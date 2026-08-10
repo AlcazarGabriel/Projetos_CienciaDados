@@ -1,0 +1,6 @@
+O dataset artigos.csv não está incluído devido ao tamanho do arquivo.
+
+Para executar o notebook, coloque o arquivo artigos.csv nesta pasta.
+
+A API pode ser executada sem o dataset, pois utiliza o modelo já treinado
+disponível em models/news_classifier.joblib.
