@@ -1,0 +1,26 @@
+# Análise e manipulação de dados
+pandas
+numpy
+
+# Estatística e inferência
+scipy
+pingouin
+
+# Visualização
+matplotlib
+seaborn
+
+# PostgreSQL e integração com Python
+SQLAlchemy
+psycopg2-binary
+
+# Diagrama entidade-relacionamento
+eralchemy2
+
+# Ambiente Jupyter
+jupyter
+ipykernel
+
+# Observação:
+# O Graphviz também precisa estar instalado no sistema operacional
+# para a geração do diagrama ER pelo ERAlchemy2.
