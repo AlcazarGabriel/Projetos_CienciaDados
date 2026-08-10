@@ -13,20 +13,13 @@ A proposta é conectar teoria, SQL, Python, visualização e interpretação de 
 > **Pergunta principal do estudo:**  
 > Os tickets elevados são anomalias ou comportamentos esperados de determinados segmentos?
 
-### 🔗 Navegação rápida
-
-- [Notebook da análise](./Notebook/01_distribuicao_transacoes.ipynb)
-- [Consultas SQL](./SQL/01_estatistica_descritiva.sql)
-- [Imagens e visualizações](./imagens/)
-- [Dependências do projeto](./requirements.txt)
-
 ---
 
 ## 🎯 Objetivos
 
 ### Objetivo técnico
 
-Aplicar conceitos fundamentais de Estatística utilizados em Ciência de Dados sobre uma base transacional com aproximadamente **583 mil registros**.
+Aplicar conceitos fundamentais de Estatística utilizados em Ciência de Dados utilizando uma base transacional com aproximadamente **583 mil registros**.
 
 ### Objetivo de aprendizado
 
@@ -103,28 +96,6 @@ O diagrama entidade-relacionamento foi gerado automaticamente em Python utilizan
 
 ---
 
-## ▶️ Como explorar o projeto
-
-1. Instale as dependências:
-
-```bash
-pip install -r requirements.txt
-```
-
-2. Configure o acesso ao PostgreSQL por variáveis de ambiente ou informe a senha quando solicitado pelo notebook.
-
-3. Abra o notebook principal:
-
-```text
-Notebook/01_distribuicao_transacoes.ipynb
-```
-
-4. Execute as células em sequência para reproduzir a análise estatística e as visualizações.
-
-> O Graphviz precisa estar instalado no sistema operacional para a geração do diagrama entidade-relacionamento.
-
----
-
 # 🧭 Etapas do projeto
 
 ## 1. Estruturação da base no PostgreSQL
@@ -189,7 +160,7 @@ Entretanto, a investigação por segmento mostrou que os maiores tickets estavam
 - Eletrônicos
 - Saúde
 
-![Tickets elevados por segmento](./imagens/tickets_altos_por_segmento.png)
+![Tickets elevados por segmento](./imagens/outliers_segmento.png)
 
 ### Aprendizado
 
@@ -217,7 +188,7 @@ A amostra aleatória reproduziu de maneira razoável o comportamento da populaç
 
 Já a amostra restrita ao segmento de Hotelaria apresentou forte viés.
 
-![Amostragem](./imagens/amostragem_representatividade.png)
+![Amostragem](./imagens/amostragem.png)
 
 ### Aprendizado
 
@@ -246,7 +217,7 @@ Para validar o conceito, o procedimento foi repetido várias vezes.
 | 1.000 | 96,20% |
 | 10.000 | 95,39% |
 
-![Intervalos de confiança](./imagens/intervalos_confianca_100.png)
+![Intervalos de confiança](./imagens/intervalos_confianca.png)
 
 ### Aprendizado
 
@@ -272,9 +243,9 @@ A relação mais relevante foi identificada entre **valor da transação e quant
 
 Mesmo restringindo a análise somente às transações de Crédito, a correlação permaneceu próxima de **0,56**.
 
-![Correlação](./imagens/matriz_correlacao_pearson.png)
+![Correlação](./imagens/correlacao.png)
 
-![Parcelas e valor](./imagens/ticket_por_parcelas_credito.png)
+![Parcelas e valor](./imagens/parcelas_credito.png)
 
 ### Aprendizado
 
@@ -350,7 +321,7 @@ Por esse motivo, a análise foi ajustada para utilizar:
 
 Essa sequência permitiu não apenas identificar se existiam diferenças entre os grupos, mas também medir a magnitude dessas diferenças.
 
-![Magnitude dos efeitos](./imagens/magnitude_efeitos_segmentos.png)
+![Magnitude dos efeitos](./imagens/magnitude_efeitos.png)
 
 As comparações foram classificadas como:
 
@@ -453,25 +424,26 @@ Possíveis perguntas futuras utilizando a mesma base:
 ```text
 Projeto_pagamentos-analytics_CD/
 │
+├── imagens/
+│   ├── diagrama_banco.png
+│   ├── distribuicao_valor_p99.png
+│   ├── outliers_segmento.png
+│   ├── amostragem.png
+│   ├── intervalos_confianca.png
+│   ├── correlacao.png
+│   ├── parcelas_credito.png
+│   ├── segmentos_media_mediana.png
+│   └── magnitude_efeitos.png
+│
 ├── Notebook/
 │   └── 01_distribuicao_transacoes.ipynb
 │
 ├── SQL/
 │   └── 01_estatistica_descritiva.sql
 │
-├── imagens/
-│   ├── amostragem_representatividade.png
-│   ├── diagrama_banco.png
-│   ├── distribuicao_valor_p99.png
-│   ├── intervalos_confianca_100.png
-│   ├── magnitude_efeitos_segmentos.png
-│   ├── matriz_correlacao_pearson.png
-│   ├── ticket_por_parcelas_credito.png
-│   ├── ticket_por_segmento.png
-│   └── tickets_altos_por_segmento.png
+├── diagrama.py
 │
-├── README.md
-└── requirements.txt
+└── README.md
 ```
 
 ---
