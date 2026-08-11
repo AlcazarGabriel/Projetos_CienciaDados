@@ -507,7 +507,7 @@ dentro de um problema próximo ao contexto de meios de pagamento.
 
 # 👤 Autor
 
-**Gabriel Alcazar da Silva**
+**Gabriel Alcazar**
 
 Analista de Dados | Business Intelligence | Python | SQL | Power BI
 
