@@ -1,108 +1,142 @@
-# 📊 Pagamentos Analytics — Estudo Estatístico de Dados Transacionais
+# 📊 Pagamentos Analytics — EDA, Estatística e Data Quality em Dados Transacionais
 
 ## Sobre o projeto
 
 Este projeto surgiu como uma evolução do **Pagamentos Analytics**, projeto inicialmente desenvolvido em Power BI para análise de dados transacionais do setor de meios de pagamento.
 
-A motivação para esta nova etapa foi ampliar minhas **hard skills** e iniciar os estudos em **Ciência de Dados** utilizando uma base que eu já conhecia e que possuía contexto de negócio.
+A proposta desta etapa foi reutilizar uma base que eu já conhecia para aprofundar meus estudos em Ciência de Dados, conectando conhecimentos que já fazem parte da minha atuação com dados (SQL, Python, modelagem, análise e entendimento de negócio) com Estatística, Análise Exploratória de Dados (EDA), Inferência Estatística e preparação para Machine Learning.
 
-Em vez de começar com exercícios estatísticos isolados, optei por reutilizar a mesma base transacional do projeto de Power BI e transformá-la em um estudo prático de **Estatística, Análise Exploratória de Dados (EDA) e Inferência Estatística**.
-
-A proposta é conectar teoria, SQL, Python, visualização e interpretação de negócio dentro de uma única investigação.
-
-> **Pergunta principal do estudo:**  
-> Os tickets elevados são anomalias ou comportamentos esperados de determinados segmentos?
+Em vez de exercícios estatísticos isolados, optei por construir uma investigação progressiva sobre aproximadamente **583 mil transações**, utilizando PostgreSQL como camada de dados e Python como ambiente principal de análise. O projeto foi dividido em duas etapas de EDA, evoluindo da distribuição dos dados até questões de Data Quality, comportamento temporal, diferenças entre grupos, estabelecimentos fora do padrão e riscos de Data Leakage.
 
 ### 🔗 Navegação rápida
 
-- [Notebook da análise](./Notebook/01_distribuicao_transacoes.ipynb)
-- [Consultas SQL](./SQL/01_estatistica_descritiva.sql)
+- [Notebook 01: Distribuição e Inferência](./Notebook/01_distribuicao_transacoes.ipynb)
+- [Notebook 02: EDA Complementar](./Notebook/02_eda_complementar.ipynb)
+- [SQL: Estatística Descritiva](./SQL/01_estatistica_descritiva.sql)
+- [SQL: Data Quality](./SQL/02_data_quality.sql)
+- [SQL: Segmentação por Dimensões](./SQL/03_segmentacao_dimensoes.sql)
 - [Imagens e visualizações](./imagens/)
 - [Dependências do projeto](./requirements.txt)
 
 ---
 
-## 🎯 Objetivos
+## 🎯 Objetivo
 
-### Objetivo técnico
+O objetivo principal é compreender o comportamento da base transacional antes de iniciar qualquer modelagem preditiva. A investigação busca responder:
 
-Aplicar conceitos fundamentais de Estatística utilizados em Ciência de Dados sobre uma base transacional com aproximadamente **583 mil registros**.
-
-### Objetivo de aprendizado
-
-Utilizar uma única investigação de negócio como fio condutor para compreender e aplicar:
-
-- Estatística descritiva e distribuições
-- Medidas de tendência central e dispersão
-- Quartis, percentis e potenciais outliers
-- Assimetria e curtose
-- Amostragem e viés
-- Erro padrão e intervalos de confiança
-- Covariância e correlação
-- Testes de hipótese e p-valor
-- Comparação entre grupos
-- Tamanho do efeito e relevância prática
+- Como os valores das transações se distribuem? Tickets elevados são anomalias ou comportamento esperado de certos segmentos?
+- Quais dimensões operacionais estão associadas à taxa de aprovação?
+- Existem padrões temporais relevantes?
+- Alguns estabelecimentos apresentam comportamento muito diferente dos demais?
+- Existem problemas de qualidade capazes de distorcer uma futura modelagem?
+- Quais variáveis não poderiam ser usadas em um modelo por representarem Data Leakage?
 
 ---
 
-## 🔎 Principais resultados
+## 🔎 Resumo executivo
 
-- A distribuição dos valores apresentou forte **assimetria à direita**, com média de **R$ 529,92** e mediana de **R$ 205,00**.
-- Aproximadamente **9% das transações** ficaram acima do limite estatístico definido pelo IQR, porém os maiores tickets se concentraram principalmente em segmentos como **Hotelaria, Eletrônicos e Saúde**.
-- A análise mostrou que um **outlier estatístico não representa necessariamente uma anomalia de negócio**.
-- Valor da transação e quantidade de parcelas apresentaram uma correlação positiva moderada.
-- Hotelaria e Eletrônicos apresentaram diferença estatisticamente significativa no ticket médio, mas com **tamanho de efeito praticamente desprezível**.
-- O estudo reforçou que **significância estatística não significa necessariamente relevância prática**.
+A EDA foi desenvolvida em duas etapas complementares. A primeira concentrou-se nos fundamentos estatísticos: distribuição, assimetria, outliers, amostragem, intervalo de confiança, correlação, testes de hipótese e tamanho do efeito. A segunda ampliou a investigação para Data Quality, aprovação por dimensões operacionais, comportamento temporal, estabelecimentos e Data Leakage.
+
+Entre os principais aprendizados, o projeto mostrou que significância estatística precisa ser sempre lida junto do tamanho do efeito e do contexto de negócio, e que variáveis aparentemente importantes (como segmento) podem estar carregando o efeito de outra variável mais próxima da causa real (como meio de pagamento).
 
 ---
 
-## 🗃️ Banco de dados
+## 💡 Principais conclusões de negócio
 
-A base originalmente utilizada no Power BI foi estruturada em **PostgreSQL** para permitir que o estudo também envolvesse consultas SQL, modelagem relacional e integração entre banco de dados e Python.
+**1. A definição da taxa de aprovação precisa ser padronizada**
 
-Para administração e exploração do banco foi utilizado o **DBeaver**, escolhido pela facilidade de navegação entre schemas, execução de consultas, inspeção de tabelas e visualização da estrutura do banco.
+A regra correta é `aprovadas / (aprovadas + negadas)`. Incluir Canceladas e Estornadas no denominador (eventos que acontecem depois da aprovação, não tentativas de autorização) altera o indicador em aproximadamente 1,2 a 1,3 ponto percentual. Diferença pequena, mas o suficiente pra mudar a leitura de um KPI mesmo com os dados tecnicamente corretos.
 
-O diagrama entidade-relacionamento foi gerado automaticamente em Python utilizando **ERAlchemy2 + Graphviz**.
+**2. Meio de pagamento e canal são as dimensões operacionais de maior relevância prática**
+
+A taxa geral de aprovação (aprovadas/tentativas) ficou em 95,26%. PIX aprova 98,13% contra 93,48% do cartão (Cramér's V=0,1065); POS aprova 95,67% contra 90,66% do Link de Pagamento (V=0,0649). Adquirente e horário são estatisticamente significativos (por causa do volume grande da amostra), mas com efeito prático desprezível.
+
+**3. Existe crescimento no período, mas a origem dos saltos abruptos não pôde ser explicada pelas variáveis disponíveis**
+
+A série temporal apresentou uma tendência de crescimento (r=0,473), porém com saltos concentrados principalmente em fevereiro e junho. A hipótese de que esses movimentos estariam relacionados à entrada de novos parceiros ou estabelecimentos foi investigada e não encontrou suporte nos dados. Como a base possui características sintéticas, esses movimentos devem ser interpretados com cautela e não tratados automaticamente como comportamento real de mercado.
+
+**4. Segmento é um fator estrutural importante, mas parte da associação com aprovação parece ser explicada pelo mix de meio de pagamento**
+
+Segmento explica a maior fatia de variância tanto de quantidade de transações (ηp²=0,111) quanto de taxa de aprovação (ηp²=0,351, confirmado por Kruskal-Wallis) entre estabelecimentos. Ao controlar a comparação pelo meio de pagamento, as diferenças entre segmentos diminuíram consideravelmente. O resultado sugere que parte da associação inicialmente observada entre segmento e aprovação está relacionada ao mix de Crédito, Débito e PIX utilizado por cada segmento (Hotelaria, com 71,6% de cartão de crédito, é o exemplo mais claro). A análise é compatível com uma possível mediação, mas não estabelece causalidade.
+
+**5. Existe um grupo concreto de 39 estabelecimentos com ativação travada**
+
+Dos 500 estabelecimentos cadastrados, 45 seguem sem nenhuma transação mais de 30 dias após o cadastro. Desses, 39 (87%) ainda estão com status Pendente, sem explicação de negócio nos dados disponíveis, o grupo de maior interesse para o time de onboarding. Os outros 6 já têm status (Bloqueado/Inativo) que justifica a ausência de transação.
+
+**6. Seis colunas são Data Leakage e precisam ser excluídas de qualquer modelo preditivo**
+
+`codigo_autorizacao`, `txid_pix`, `motivo_negativa_id`, `valor_taxa`, `valor_liquido` e `tempo_processamento_ms` são geradas como consequência ou durante o próprio processo de decisão de aprovação, e não estariam disponíveis no momento em que um modelo precisaria prever esse resultado. A pergunta usada como critério em toda a checagem: essa informação estaria disponível antes de a transação ser processada?
+
+---
+
+## 🗃️ Arquitetura e stack
+
+A base foi estruturada em **PostgreSQL**, permitindo trabalhar com consultas SQL, relacionamentos e integração direta com Python. O **DBeaver** foi usado para administração e exploração do banco. O diagrama entidade-relacionamento foi gerado automaticamente com **ERAlchemy2 + Graphviz**.
 
 ![Diagrama do banco de dados](./imagens/diagrama_banco.png)
 
----
-
-## 🛠️ Tecnologias utilizadas
-
-### Banco de dados
-- PostgreSQL
-- SQL
-- DBeaver
-
-### Python e análise de dados
-- Python
-- Pandas
-- NumPy
-- SciPy
-- Pingouin
-
-### Visualização
-- Seaborn
-- Matplotlib
-
-### Integração
-- SQLAlchemy
-- Psycopg2
-
-### Desenvolvimento
-- Jupyter Notebook
-- VS Code
-- Git
-- GitHub
-
-### Modelagem
-- ERAlchemy2
-- Graphviz
+**Banco de dados:** PostgreSQL, SQL, DBeaver
+**Python e análise:** Python, Pandas, NumPy, SciPy, Pingouin
+**Visualização:** Seaborn, Matplotlib
+**Integração:** SQLAlchemy, Psycopg2
+**Desenvolvimento:** Jupyter Notebook, VS Code, Git, GitHub
+**Modelagem/Diagrama:** ERAlchemy2, Graphviz
 
 ---
 
-## ▶️ Como explorar o projeto
+## 🧭 Etapas do projeto
+
+| Notebook | Foco | Status |
+|---|---|---|
+| [`01_distribuicao_transacoes.ipynb`](./Notebook/01_distribuicao_transacoes.ipynb) | Distribuição, outliers, amostragem, inferência, correlação e testes entre grupos | ✅ Concluído |
+| [`02_eda_complementar.ipynb`](./Notebook/02_eda_complementar.ipynb) | Data Quality, aprovação por dimensões, temporalidade, estabelecimentos e Data Leakage | ✅ Concluído |
+| `03_feature_engineering.ipynb` | Features temporais e comportamentais sem leakage | 🔜 Próxima etapa |
+| `04_modelagem_aprovacao.ipynb` | Baseline e classificação de aprovação | ⏳ Planejado |
+
+### Notebook 01: Distribuição, Estatística e Inferência
+
+Construiu a base estatística da investigação: estatística descritiva, medidas de tendência central e dispersão, assimetria e curtose, IQR e outliers, amostragem e viés, intervalo de confiança, correlação de Pearson e Spearman, teste t de Welch, ANOVA, teste de Levene, ANOVA de Welch, Games-Howell, Cohen's d e Hedges' g.
+
+**Aprendizado central:** outliers, correlações e diferenças estatisticamente significativas precisam ser interpretados considerando magnitude, contexto e regra de negócio.
+
+### Notebook 02: EDA Complementar
+
+Fechou os blocos de EDA que ainda não tinham sido explorados no Notebook 01:
+
+- **Data Quality:** completude, valores inválidos, consistência entre campos, duplicidade lógica e valores sentinela.
+- **Aprovação por dimensão:** meio de pagamento, bandeira, adquirente, canal e horário, usando Cramér's V para medir magnitude prática além do p-valor.
+- **Análise temporal:** dia da semana, série diária, média móvel e investigação dos saltos de volume.
+- **Estabelecimentos:** concentração da quantidade de transações (Pareto), taxa de aprovação atípica e estabelecimentos sem ativação.
+- **Data Leakage:** mapeamento das variáveis que não poderiam ser usadas em um modelo preditivo, direto insumo para a próxima etapa.
+
+---
+
+## ⚠️ Data Quality e limitações
+
+- A base é utilizada para fins de estudo e portfólio e possui características sintéticas, o que explica alguns padrões (como os saltos abruptos de volume) que não puderam ser explicados pelas variáveis disponíveis nos dados.
+- Relações encontradas durante a EDA representam associação, não causalidade. Onde um padrão é compatível com mediação (Conclusão 4), isso é sinalizado como tal, não como relação causal comprovada.
+- Alguns testes apresentam p-valores muito baixos por causa do volume grande da amostra, por isso tamanho do efeito e contexto de negócio foram usados em conjunto com significância estatística em toda a análise.
+- Um subconjunto de 23.149 transações (~4% da base) não tem `codigo_autorizacao` nem `txid_pix` preenchidos. A checagem de duplicidade lógica foi estendida a esse subconjunto com uma chave alternativa e não encontrou evidência de duplicidade nas 583.000 transações.
+
+---
+
+## 📊 Visualizações selecionadas
+
+![Curva de concentração de transações por estabelecimento](./imagens/concentracao_volume_estabelecimento.png)
+
+![Magnitude do efeito por dimensão operacional](./imagens/cramers_v_dimensoes.png)
+
+![Composição de meio de pagamento por segmento](./imagens/heatmap_segmento_meio_pagamento.png)
+
+![Taxa de aprovação por segmento](./imagens/anova_taxa_por_segmento.png)
+
+![Evidência de Data Leakage em valor_taxa e valor_liquido](./imagens/leakage_valor_taxa_liquido.png)
+
+As demais visualizações geradas nas duas etapas de EDA estão disponíveis na pasta [`imagens/`](./imagens/).
+
+---
+
+## ▶️ Como executar
 
 1. Instale as dependências:
 
@@ -112,366 +146,35 @@ pip install -r requirements.txt
 
 2. Configure o acesso ao PostgreSQL por variáveis de ambiente ou informe a senha quando solicitado pelo notebook.
 
-3. Abra o notebook principal:
+3. Execute os notebooks na ordem:
 
 ```text
 Notebook/01_distribuicao_transacoes.ipynb
+Notebook/02_eda_complementar.ipynb
 ```
 
-4. Execute as células em sequência para reproduzir a análise estatística e as visualizações.
+As células executam as consultas SQL diretamente no PostgreSQL e constroem as análises e visualizações em Python.
 
 > O Graphviz precisa estar instalado no sistema operacional para a geração do diagrama entidade-relacionamento.
 
 ---
 
-# 🧭 Etapas do projeto
-
-## 1. Estruturação da base no PostgreSQL
-
-A primeira etapa foi migrar e organizar os dados do projeto de Power BI em um banco relacional PostgreSQL.
-
-Foram criadas tabelas para representar as transações e suas dimensões relacionadas, permitindo trabalhar com relacionamentos, consultas SQL e análises mais próximas de um ambiente real de dados.
-
-Nesta etapa foram trabalhados:
-
-- criação do banco de dados;
-- criação das tabelas;
-- definição de chaves primárias;
-- definição de relacionamentos;
-- carga dos dados;
-- validação da quantidade de registros;
-- exploração inicial pelo DBeaver;
-- geração do diagrama entidade-relacionamento.
-
----
-
-## 2. Estatística descritiva
-
-A análise começou pela variável `valor_bruto`.
-
-Foram estudadas medidas básicas para compreender o comportamento da distribuição:
-
-- média;
-- mediana;
-- quartis;
-- percentis;
-- variância;
-- desvio padrão;
-- coeficiente de variação.
-
-Resultados iniciais:
-
-| Métrica | Resultado |
-|---|---:|
-| Média | R$ 529,92 |
-| Mediana | R$ 205,00 |
-| Assimetria | 4,44 |
-| Curtose | 36,74 |
-
-A diferença entre média e mediana indicou forte **assimetria à direita**.
-
-![Distribuição dos valores](./imagens/distribuicao_valor_p99.png)
-
-### Aprendizado
-
-A média, isoladamente, não representa bem distribuições fortemente assimétricas. A mediana e os percentis ajudam a interpretar melhor o comportamento típico dos valores.
-
----
-
-## 3. Investigação de potenciais outliers
-
-Utilizando o método do **Intervalo Interquartil (IQR)**, foi identificado um limite superior aproximado de:
-
-**R$ 1.476,72**
-
-Aproximadamente **9% das transações** ficaram acima desse limite.
-
-Entretanto, a investigação por segmento mostrou que os maiores tickets estavam concentrados principalmente em:
-
-- Hotelaria
-- Eletrônicos
-- Saúde
-
-![Tickets elevados por segmento](./imagens/tickets_altos_por_segmento.png)
-
-### Aprendizado
-
-> Um outlier estatístico não representa necessariamente um erro ou anomalia de negócio.
-
-O contexto do segmento precisa ser considerado antes de qualquer exclusão de observações.
-
----
-
-## 4. Amostragem e representatividade
-
-Para estudar o conceito de amostragem, foram comparados:
-
-- população completa;
-- amostra aleatória de 10.000 registros;
-- amostra enviesada para o segmento de Hotelaria.
-
-| Grupo | Média | Mediana |
-|---|---:|---:|
-| População | R$ 529,92 | R$ 205,00 |
-| Amostra aleatória | R$ 536,67 | R$ 208,36 |
-| Hotelaria | R$ 1.467,19 | R$ 1.116,06 |
-
-A amostra aleatória reproduziu de maneira razoável o comportamento da população.
-
-Já a amostra restrita ao segmento de Hotelaria apresentou forte viés.
-
-![Amostragem e representatividade](./imagens/amostragem_representatividade.png)
-
-### Aprendizado
-
-> Uma amostra grande não garante representatividade.
-
-A forma como os registros são selecionados é tão importante quanto o tamanho da amostra.
-
----
-
-## 5. Intervalo de confiança
-
-A partir de uma amostra aleatória de 10.000 transações:
-
-- média amostral: **R$ 536,67**
-- erro padrão: **R$ 8,27**
-- margem de erro: **± R$ 16,21**
-- intervalo de confiança de 95%: **R$ 520,46 até R$ 552,88**
-
-A média real da população, **R$ 529,92**, ficou dentro do intervalo calculado.
-
-Para validar o conceito, o procedimento foi repetido várias vezes.
-
-| Número de simulações | Cobertura observada |
-|---:|---:|
-| 100 | 95,00% |
-| 1.000 | 96,20% |
-| 10.000 | 95,39% |
-
-![Intervalos de confiança](./imagens/intervalos_confianca_100.png)
-
-### Aprendizado
-
-O nível de confiança está relacionado ao comportamento do método ao longo de repetidas amostragens e não à probabilidade de um único intervalo específico conter o parâmetro.
-
----
-
-## 6. Covariância e correlação
-
-Foram analisadas relações entre:
-
-- valor da transação;
-- tempo de processamento;
-- quantidade de parcelas.
-
-| Relação | Pearson | Spearman |
-|---|---:|---:|
-| Valor × Tempo de processamento | 0,165 | 0,192 |
-| Valor × Quantidade de parcelas | 0,535 | 0,502 |
-| Tempo de processamento × Parcelas | 0,278 | 0,353 |
-
-A relação mais relevante foi identificada entre **valor da transação e quantidade de parcelas**.
-
-Mesmo restringindo a análise somente às transações de Crédito, a correlação permaneceu próxima de **0,56**.
-
-![Matriz de correlação](./imagens/matriz_correlacao_pearson.png)
-
-![Ticket por quantidade de parcelas](./imagens/ticket_por_parcelas_credito.png)
-
-### Aprendizado
-
-Os dados sustentam uma percepção comum do negócio:
-
-> Transações de maior valor tendem a apresentar maior quantidade de parcelas.
-
-Entretanto, correlação representa associação e não necessariamente causalidade.
-
----
-
-## 7. Teste de hipótese
-
-Foi realizada uma comparação entre os tickets médios de **Hotelaria e Eletrônicos**.
-
-### Hipóteses
-
-**H0:** os dois segmentos possuem a mesma média.
-
-**H1:** os segmentos possuem médias diferentes.
-
-O teste t de Welch apresentou:
-
-- estatística t: **4,341**
-- p-valor: **0,0000142**
-
-A hipótese nula foi rejeitada.
-
-Existe evidência estatística de diferença entre as médias dos dois segmentos.
-
----
-
-## 8. Significância estatística × relevância prática
-
-As médias encontradas foram:
-
-| Segmento | Ticket médio |
-|---|---:|
-| Hotelaria | R$ 1.458,48 |
-| Eletrônicos | R$ 1.422,75 |
-
-A diferença absoluta foi de:
-
-**R$ 35,73 — aproximadamente 2,51%**
-
-O tamanho do efeito foi calculado utilizando **Cohen's d**:
-
-**d = 0,0281**
-
-### Aprendizado
-
-Apesar do p-valor extremamente baixo, o tamanho do efeito foi praticamente desprezível.
-
-> Significância estatística não significa necessariamente relevância prática.
-
-Grandes volumes de dados podem tornar diferenças muito pequenas estatisticamente detectáveis.
-
----
-
-## 9. Comparação entre vários segmentos
-
-Para avaliar simultaneamente todos os segmentos foi aplicada inicialmente uma **ANOVA**.
-
-A análise das variâncias mostrou diferenças consideráveis entre os grupos.
-
-O **teste de Levene** confirmou que as variâncias não eram homogêneas.
-
-Por esse motivo, a análise foi ajustada para utilizar:
-
-- ANOVA de Welch;
-- Games-Howell para comparações pós-hoc;
-- Hedges' g para tamanho do efeito.
-
-Essa sequência permitiu não apenas identificar se existiam diferenças entre os grupos, mas também medir a magnitude dessas diferenças.
-
-![Magnitude dos efeitos](./imagens/magnitude_efeitos_segmentos.png)
-
-As comparações foram classificadas como:
-
-- desprezível;
-- pequena;
-- moderada;
-- grande.
-
-### Aprendizado
-
-Essa etapa reforçou novamente que uma diferença estatisticamente significativa pode possuir uma magnitude pequena ou até desprezível.
-
----
-
-# 📌 Principais aprendizados até o momento
-
-O projeto permitiu aplicar conceitos estatísticos dentro de um contexto realista de negócio.
-
-Os principais aprendizados foram:
-
-1. **A média nem sempre representa bem uma distribuição.**
-2. **Outlier estatístico não significa automaticamente erro.**
-3. **Amostra grande não garante representatividade.**
-4. **Intervalos de confiança representam a incerteza de uma estimativa.**
-5. **Correlação não significa causalidade.**
-6. **P-valor não mede importância prática.**
-7. **Tamanho do efeito é essencial para interpretar diferenças.**
-8. **As premissas dos testes estatísticos precisam ser verificadas.**
-9. **O método estatístico deve ser escolhido de acordo com as características dos dados.**
-10. **O contexto de negócio continua sendo essencial para interpretar qualquer resultado estatístico.**
-
----
-
-# 🚀 Próximos passos
-
-Este projeto representa a primeira etapa dos meus estudos aplicados em Ciência de Dados.
-
-A evolução prevista seguirá uma sequência progressiva.
-
-## Próxima etapa — Fundamentos estatísticos
-
-- Probabilidade aplicada
-- Distribuições de probabilidade
-- Testes adicionais de hipótese
-- Testes para proporções
-- Regressão linear como conceito estatístico
-- Análise de resíduos
-- Multicolinearidade
-
-## Etapa seguinte — Preparação para Machine Learning
-
-- Feature engineering
-- Encoding de variáveis categóricas
-- Escalonamento e normalização
-- Separação entre treino, validação e teste
-- Prevenção de data leakage
-- Seleção de variáveis
-
-## Roadmap — Modelos supervisionados
-
-### Regressão
-- Regressão Linear
-- Ridge
-- Lasso
-- Árvores de Regressão
-- Random Forest
-- Gradient Boosting
-
-### Classificação
-- Regressão Logística
-- Decision Tree
-- Random Forest
-- Gradient Boosting
-
-### Possíveis perguntas futuras utilizando a mesma base
-
-- Quais fatores estão associados à aprovação de uma transação?
-- É possível prever a probabilidade de aprovação?
-- Quais características estão associadas a tempos de processamento maiores?
-- É possível identificar comportamentos transacionais fora do padrão?
-- Quais variáveis possuem maior importância para explicar o valor das transações?
-
-## Roadmap — Avaliação de modelos
-
-- MAE
-- RMSE
-- R²
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- Matriz de confusão
-- ROC-AUC
-- Validação cruzada
-
----
-
-# 📁 Estrutura do projeto
+## 📁 Estrutura do projeto
 
 ```text
 Projeto_pagamentos-analytics_CD/
 │
 ├── Notebook/
-│   └── 01_distribuicao_transacoes.ipynb
+│   ├── 01_distribuicao_transacoes.ipynb
+│   └── 02_eda_complementar.ipynb
 │
 ├── SQL/
-│   └── 01_estatistica_descritiva.sql
+│   ├── 01_estatistica_descritiva.sql
+│   ├── 02_data_quality.sql
+│   └── 03_segmentacao_dimensoes.sql
 │
 ├── imagens/
-│   ├── amostragem_representatividade.png
-│   ├── diagrama_banco.png
-│   ├── distribuicao_valor_p99.png
-│   ├── intervalos_confianca_100.png
-│   ├── magnitude_efeitos_segmentos.png
-│   ├── matriz_correlacao_pearson.png
-│   ├── ticket_por_parcelas_credito.png
-│   ├── ticket_por_segmento.png
-│   └── tickets_altos_por_segmento.png
+│   └── 21 visualizações geradas pelas duas etapas de EDA
 │
 ├── README.md
 └── requirements.txt
@@ -479,36 +182,26 @@ Projeto_pagamentos-analytics_CD/
 
 ---
 
-# 🔐 Segurança
+## 🚀 Roadmap
 
-As credenciais de acesso ao PostgreSQL não são armazenadas diretamente no código.
+Com a EDA encerrada, a próxima etapa será transformar os padrões identificados em variáveis úteis para um problema de classificação, sempre respeitando a disponibilidade da informação no momento da previsão.
 
-Os scripts e notebooks utilizam variáveis de ambiente ou solicitam a senha durante a execução.
+**EDA ✅ → Feature Engineering 🔜 → Baseline → Segundo modelo → Validação e análise de erros**
 
----
-
-# 📚 Contexto
-
-Os dados utilizados neste projeto são destinados a estudo e construção de portfólio.
-
-O objetivo principal é demonstrar a aplicação prática de conceitos de:
-
-- SQL
-- PostgreSQL
-- Python
-- Estatística
-- EDA
-- Inferência Estatística
-- Visualização de Dados
-
-dentro de um problema próximo ao contexto de meios de pagamento.
+A principal regra herdada da EDA será a prevenção de Data Leakage: nenhuma variável poderá utilizar informação gerada durante ou após o resultado que o modelo pretende prever.
 
 ---
 
-# 👤 Autor
+## 🔐 Segurança
+
+As credenciais de acesso ao PostgreSQL não são armazenadas diretamente no código. Os notebooks utilizam variáveis de ambiente ou solicitam a senha durante a execução.
+
+---
+
+## 👤 Autor
 
 **Gabriel Alcazar**
 
 Analista de Dados | Business Intelligence | Python | SQL | Power BI
 
-Projeto desenvolvido como parte da evolução dos estudos em **Ciência de Dados e Estatística Aplicada**.
+Projeto desenvolvido como parte da evolução dos estudos em Ciência de Dados, Estatística Aplicada e Machine Learning.

@@ -1,25 +1,26 @@
 # Análise e manipulação de dados
-pandas
-numpy
+pandas==3.0.5
+numpy==2.5.2
 
 # Estatística e inferência
-scipy
-pingouin
+scipy==1.18.0
+pingouin==0.6.1
 
 # Visualização
-matplotlib
-seaborn
+matplotlib==3.11.1
+seaborn==0.13.2
 
 # PostgreSQL e integração com Python
-SQLAlchemy
-psycopg2-binary
+SQLAlchemy==2.0.51
+psycopg2-binary==2.9.12
 
 # Diagrama entidade-relacionamento
-eralchemy2
+eralchemy2==1.4.1
+pygraphviz==2.0.1
 
 # Ambiente Jupyter
-jupyter
-ipykernel
+jupyter==1.1.1
+ipykernel==7.3.0
 
 # Observação:
 # O Graphviz também precisa estar instalado no sistema operacional
